@@ -5,6 +5,7 @@ import json
 import subprocess
 import sys
 import textwrap
+import pyperclip
 
 try:
     from urllib.parse import urlencode
@@ -25,7 +26,7 @@ def valid_style(str):
 
 def valid_title(str):
     if not str:
-        print('usage: tcc [-h] [--style STYLE] words [words ...]')
+        print('usage: tcc [-h] [--style STYLE] [--clipboard] words [words ...]')
         print('tcc: error: too few arguments')
         sys.exit(1)
 
@@ -45,20 +46,21 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--style', default='C', type=valid_style,
                     help='choose one: A, P, C (default), M, N or W')
+parser.add_argument('--clipboard', help='use clipboard as input and output', action="store_true")
 
 opts = {}
 if not sys.stdin.isatty():
     opts = {
-        'default': sys.stdin.read().split(),
-        'nargs': '?'
+        'default': sys.stdin.read().split()
     }
 
 parser.add_argument('title', default=opts.get('default', None),
-                    metavar='words', type=str, nargs=opts.get('nargs', '+'),
+                    metavar='words', type=str, nargs='*',
                     help='1 or more words (the title) you want to convert')
 
 args = parser.parse_args()
-
+if args.clipboard:
+    args.title = pyperclip.paste().split()
 
 def trim(title):
     return ' '.join(title).strip()
@@ -115,4 +117,7 @@ for key, value in body_json.items():
 
 result += body_json['lastJoint'].encode('utf-8')
 
-print(result)
+if args.clipboard:
+    pyperclip.copy(result)
+else:
+    print(result)

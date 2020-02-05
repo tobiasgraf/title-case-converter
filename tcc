@@ -6,6 +6,7 @@ import subprocess
 import sys
 import textwrap
 import pyperclip
+import notify2
 
 try:
     from urllib.parse import urlencode
@@ -26,8 +27,8 @@ def valid_style(str):
 
 def valid_title(str):
     if not str:
-        print('usage: tcc [-h] [--style STYLE] [--clipboard] words [words ...]')
-        print('tcc: error: too few arguments')
+        parser.print_help(sys.stderr)
+        print('\ntcc: error: too few arguments')
         sys.exit(1)
 
 
@@ -47,6 +48,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--style', default='C', type=valid_style,
                     help='choose one: A, P, C (default), M, N or W')
 parser.add_argument('--clipboard', help='use clipboard as input and output', action="store_true")
+parser.add_argument('--notify', help='notify when done', action="store_true")
 
 opts = {}
 if not sys.stdin.isatty():
@@ -84,6 +86,14 @@ def replace_chars(str):
 def style_enabled(style):
     return 'true' if args.style == style else 'false'
 
+def sendmessage(title, message):
+    notify2.init('tcc')
+    n = notify2.Notification(title,  
+                             message,  
+                             "/home/tobias/git/tools/title-case-converter/clipboard.svg"   # Icon name  
+                            )  
+    n.show() 
+    return
 
 title = squish(trim(args.title))
 
@@ -121,3 +131,5 @@ if args.clipboard:
     pyperclip.copy(result)
 else:
     print(result)
+if args.notify:
+    sendmessage("tcc", "converted to Titlecase: "+ result)

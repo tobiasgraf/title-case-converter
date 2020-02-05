@@ -90,7 +90,7 @@ def sendmessage(title, message):
     notify2.init('tcc')
     n = notify2.Notification(title,  
                              message,  
-                             "/home/tobias/git/tools/title-case-converter/clipboard.svg"   # Icon name  
+                             "/usr/share/pixmaps/tcc.svg"   # Icon name  
                             )  
     n.show() 
     return
